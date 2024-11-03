@@ -9,7 +9,7 @@ from django.conf import settings
 
 
 class AccountGroup(models.Model):
-    NAMES_CHOICES = settings.NAMES_CHOICES
+    NAMES_CHOICES = settings.ACCOUNT_GROUP_CHOICES
     name = models.CharField(max_length=50, choices=NAMES_CHOICES)
     code = models.CharField(max_length=50, blank=True, null=True)
 
@@ -38,7 +38,8 @@ class SubAccount(models.Model):
         AccountGroup, on_delete=models.CASCADE, related_name="sub_accounts_groups_set"
     )
     name = models.CharField(
-        max_length=100, choices=settings.SUB_ACCOUNT_NAMES_CHOICES, unique=True
+        max_length=100,
+        choices=settings.SUB_ACCOUNT_NAMES_CHOICES,
     )
     is_defined = models.BooleanField(default=False)
 
@@ -56,7 +57,7 @@ class Account(models.Model):
     sub_account = models.ForeignKey(
         SubAccount, on_delete=models.CASCADE, related_name="accounts_set"
     )
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200)
     code = models.CharField(max_length=11, blank=True, null=True)
     is_default = models.BooleanField(default=False)
     payment_type = models.CharField(
@@ -82,6 +83,33 @@ class Account(models.Model):
     def save(self, *args, **kwargs):
         self.generate_code()
         super(Account, self).save(*args, **kwargs)
+
+
+# # CREATE TABLE `company_accounts` (
+#   `id` bigint(20) UNSIGNED NOT NULL,
+#   `account_type` enum('SALES_ACCOUNT','COST_OF_GOODS_SOLD','STORE_ACCOUNT','DISCOUNT_ALLOWED_ACCOUNT','STOCK_ADJUSTMENT_ACCOUNT','ROUND_OFF_ACCOUNT','DISCOUNT_RECEIVED_ACCOUNT','WRITE_OFF_ACCOUNT','EMPLOYEE_ADVANCE_ACCOUNT','DEFERRED_REVEUE_ACCOUNT','DEFERRED_EXPENSE_ACCOUNT','STOCK_RECEIVED_BUT_NOT_BILLED','EXPENSES_INCLUDED_IN_VALUATION','VAT_ACCOUNT') NOT NULL,
+#   `account_id` bigint(20) UNSIGNED NOT NULL
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+class CompanyAccount(models.Model):
+    ACCOUNT_TYPE_CHOICES = settings.COMPADNY_ACCOUNT_TYPE_CHOICES
+    account_type = models.CharField(
+        max_length=50, choices=ACCOUNT_TYPE_CHOICES, default="SALES_ACCOUNT"
+    )
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name="company_accounts_set",
+        null=True,
+    )
+
+    class Meta:
+        verbose_name_plural = "Company Accounts"
+        db_table = "company_accounts"
+
+    def __str__(self):
+        return self.account.name
 
 
 class Currency(models.Model):
@@ -110,7 +138,7 @@ class JournalVoucher(models.Model):
     )
     date = models.DateTimeField()
     reference_number = models.CharField(max_length=100, default="NULL", blank=True)
-    exchange_rate = models.FloatField()
+    exchange_rate = models.FloatField(null=True, blank=True)
     transaction_type = models.CharField(
         max_length=20, choices=TRANSACTION_TYPE_CHOICES, default="SALES_INVOICE"
     )
@@ -135,9 +163,7 @@ class JournalVoucherAccount(models.Model):
     journal_voucher = models.ForeignKey(
         JournalVoucher, on_delete=models.CASCADE, related_name="accounts_set"
     )
-    account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, related_name="account_used_set"
-    )
+    account = models.CharField(max_length=100, blank=True, null=True)
     currency = models.ForeignKey(
         Currency, on_delete=models.CASCADE, blank=True, null=True
     )

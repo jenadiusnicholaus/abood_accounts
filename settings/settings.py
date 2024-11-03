@@ -153,7 +153,7 @@ REST_FRAMEWORK = {
 
 API_VERSION = "v1.0"
 
-NAMES_CHOICES = (
+ACCOUNT_GROUP_CHOICES = (
     ("CASH_IN_HAND", "CASH IN HAND"),
     ("BANK", "BANK"),
     ("TRADE_DEBTORS", "TRADE DEBTORS"),
@@ -200,6 +200,26 @@ SUB_ACCOUNT_NAMES_CHOICES = (
     ("PAYROLL_EXPENSES", "PAYROLL EXPENSES"),
     ("ADMINISTRATIVE_EXPENSES", "ADMINISTRATIVE EXPENSES"),
     ("ACCOUNTS_PAYABLE", "ACCOUNTS PAYABLE"),
+)
+
+COMPADNY_ACCOUNT_TYPE_CHOICES = (
+    ("SALES_ACCOUNT", "Sales Account"),
+    ("COST_OF_GOODS_SOLD", "Cost of Goods Sold"),
+    ("STORE_ACCOUNT", "Store Account"),
+    ("DISCOUNT_ALLOWED_ACCOUNT", "Discount Allowed Account"),
+    ("STOCK_ADJUSTMENT_ACCOUNT", "Stock Adjustment Account"),
+    ("ROUND_OFF_ACCOUNT", "Round Off Account"),
+    ("DISCOUNT_RECEIVED_ACCOUNT", "Discount Received Account"),
+    ("WRITE_OFF_ACCOUNT", "Write Off Account"),
+    ("EMPLOYEE_ADVANCE_ACCOUNT", "Employee Advance Account"),
+    ("DEFERRED_REVEUE_ACCOUNT", "Deferred Revenue Account"),
+    ("DEFERRED_EXPENSE_ACCOUNT", "Deferred Expense Account"),
+    ("STOCK_RECEIVED_BUT_NOT_BILLED", "Stock Received But Not Billed"),
+    ("EXPENSES_INCLUDED_IN_VALUATION", "Expenses Included in Valuation"),
+    ("VAT_ACCOUNT", "VAT Account"),
+    ("DEBTOR_ACCOUNT", "Debtor Account"),
+    ("CREDITOR_ACCOUNT", "Creditor Account"),
+    ("TRANST_LOSS_ACCOUNT", "Transportation Loss Account"),
 )
 
 

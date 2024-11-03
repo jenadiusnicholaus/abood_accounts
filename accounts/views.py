@@ -1,4 +1,10 @@
-from accounts.models import Account, AccountGroup, Currency, JournalVoucherAccount
+from accounts.models import (
+    Account,
+    AccountGroup,
+    Currency,
+    JournalVoucherAccount,
+    SubAccount,
+)
 from accounts.serializers import (
     CreateAccountSerializer,
     CreateJournalVoucherAccountEntitySerializer,
@@ -16,6 +22,7 @@ from rest_framework import status
 from django.db import transaction
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
+from .helpers import AccountHelpers
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -29,28 +36,30 @@ class AccountViewSet(viewsets.ModelViewSet):
     permission_classes = []
 
     def create(self, request, *args, **kwargs):
-        currency = request.data.get("currency")
+        currency = request.data.get("currency_id")
 
-        print(request.data)
+        account_group, _ = AccountGroup.objects.get_or_create(
+            name=request.data.get("account")
+        )
 
-        currency_obj, _ = Currency.objects.get_or_create(name=currency)
-
-        account_group, _ = AccountGroup.objects.get_or_create(name="TRADE_DEBTORS")
-
-        sub_account_data = {"account_group": account_group.id, "name": "TRADE_DEBTORS"}
+        sub_account, _ = SubAccount.objects.get_or_create(
+            name=request.data.get("account"),
+            account_group=account_group,
+        )
+        # debtors
         account_data = {
-            "sub_account": None,
-            "name": "Trade Debtors",
-            "payment_type": request.data.get("payment_type"),
+            "sub_account": sub_account.id,
+            "name": sub_account.name,
+            "payment_type": "ONE_TIME",
         }
 
         jour_voucher_data = {
             "user": request.user.id,
-            "currency": currency_obj.id,
+            "currency": currency,
             "date": request.data.get("date"),
             "reference_number": request.data.get("reference_number"),
             "exchange_rate": request.data.get("exchange_rate"),
-            "transaction_type": request.data.get("transaction_mode"),
+            "transaction_type": request.data.get("transaction_type"),
             "transaction_id": request.data.get("transaction_id"),
             "cheque_number": request.data.get("cheque_number"),
             "control_number": request.data.get("control_number"),
@@ -60,10 +69,15 @@ class AccountViewSet(viewsets.ModelViewSet):
         jour_voucher_account_data = {
             "journal_voucher": None,
             "account": None,
-            "currency": currency_obj.id,
+            "currency": currency,
             "amount": request.data.get("amount"),
-            "transaction_type": request.data.get("transaction_type"),
+            "transaction_type": None,
             "narration": request.data.get("narration"),
+        }
+
+        company_account_data = {
+            "account_type": "DEBTOR_ACCOUNT",
+            "account": None,
         }
 
         jour_voucher_account_entity_data = {
@@ -72,75 +86,38 @@ class AccountViewSet(viewsets.ModelViewSet):
             "accountable_type_id": request.data.get("accountable_type_id"),
         }
 
-        with transaction.atomic():
-            sub_account_serializer = CreateSubAccountSerializer(data=sub_account_data)
-            if not sub_account_serializer.is_valid():
-                return Response(
-                    sub_account_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+        with transaction.atomic():  # Begin a transaction block
+            try:
+                cr_response = AccountHelpers.create_CR(
+                    account_data=account_data,
+                    company_account_data=company_account_data,
+                    jour_voucher_data=jour_voucher_data,
+                    jour_voucher_account_data=jour_voucher_account_data,
+                    jour_voucher_account_entity_data=jour_voucher_account_entity_data,
                 )
-            sub_account = sub_account_serializer.save()
 
-            account_data["sub_account"] = sub_account.id
-            account_serializer = CreateAccountSerializer(data=account_data)
-            if not account_serializer.is_valid():
-                # print(account_serializer.errors)
-                sub_account.delete()
-                return Response(
-                    account_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                # Check if CR creation returned an error response
+                if isinstance(cr_response, Response):
+                    return cr_response  # Return the error response from create_CR
+
+                dr_response = AccountHelpers.create_DR(
+                    account_data=account_data,
+                    company_account_data=company_account_data,
+                    jour_voucher_data=jour_voucher_data,
+                    jour_voucher_account_data=jour_voucher_account_data,
+                    jour_voucher_account_entity_data=jour_voucher_account_entity_data,
                 )
-            account = account_serializer.save()
 
-            jour_voucher_serializer = CreateJournalVoucherSerializer(
-                data=jour_voucher_data
-            )
-            if not jour_voucher_serializer.is_valid():
-                print(jour_voucher_serializer.errors)
-                sub_account.delete()
-                account.delete()
+                # Check if DR creation returned an error response
+                if isinstance(dr_response, Response):
+                    return dr_response  # Return the error response from create_DR
+
                 return Response(
-                    jour_voucher_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                    {"message": "Saved successfully"}, status=status.HTTP_201_CREATED
                 )
-            jour_voucher = jour_voucher_serializer.save()
 
-            jour_voucher_account_data["journal_voucher"] = jour_voucher.id
-            jour_voucher_account_data["account"] = account.id
-            jour_voucher_account_serializer = CreateJournalVoucherAccountSerializer(
-                data=jour_voucher_account_data
-            )
-
-            if not jour_voucher_account_serializer.is_valid():
-                # print(jour_voucher_account_serializer.errors)
-                sub_account.delete()
-                account.delete()
-                jour_voucher.delete()
+            except Exception as e:
                 return Response(
-                    jour_voucher_account_serializer.errors,
+                    {"error": str(e)},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
-            jour_voucher_account = jour_voucher_account_serializer.save()
-            jour_voucher_account_entity_data["journal_voucher_account"] = (
-                jour_voucher_account.id
-            )
-            jour_voucher_account_entity_serializer = (
-                CreateJournalVoucherAccountEntitySerializer(
-                    data=jour_voucher_account_entity_data
-                )
-            )
-
-            if not jour_voucher_account_entity_serializer.is_valid():
-                # print(jour_voucher_account_entity_serializer.errors)
-                sub_account.delete()
-                account.delete()
-                jour_voucher.delete()
-                jour_voucher_account.delete()
-                return Response(
-                    jour_voucher_account_entity_serializer.errors,
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            jour_voucher_account_entity = jour_voucher_account_entity_serializer.save()
-
-        return Response(
-            {"message": "Saved successfully"}, status=status.HTTP_201_CREATED
-        )

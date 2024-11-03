@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from accounts.models import (
     Account,
     AccountGroup,
+    CompanyAccount,
     Currency,
     JournalVoucher,
     JournalVoucherAccount,
@@ -130,12 +131,6 @@ class UpdateJournalVoucherSerializer(serializers.ModelSerializer):
 
 
 class GetJournalVoucherAccountSerializer(serializers.Serializer):
-    class Meta:
-        model = JournalVoucherAccount
-        fields = "__all__"
-
-
-class CreateJournalVoucherAccountSerializer(serializers.ModelSerializer):
     journal_voucher = GetJournalVoucherSerializer()
     account = GetAccountSerializer()
     entity = serializers.SerializerMethodField()
@@ -155,6 +150,9 @@ class CreateJournalVoucherAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = JournalVoucherAccount
         fields = "__all__"
+
+
+class CreateJournalVoucherAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = JournalVoucherAccount
@@ -185,4 +183,23 @@ class CreateJournalVoucherAccountEntitySerializer(serializers.ModelSerializer):
 class UpdateJournalVoucherAccountEntitySerializer(serializers.ModelSerializer):
     class Meta:
         model = JournalVoucherAccountEntity
+        fields = "__all__"
+
+
+# ---------- Company Account Serializers ----------
+class GetCompanyAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyAccount
+        fields = "__all__"
+
+
+class CreateCompanyAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyAccount
+        fields = "__all__"
+
+
+class UpdateCompanyAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyAccount
         fields = "__all__"
