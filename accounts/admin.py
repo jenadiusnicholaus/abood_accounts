@@ -7,6 +7,8 @@ from .models import (
     JournalVoucher,
     JournalVoucherAccount,
     JournalVoucherAccountEntity,
+    CompanyAccount,
+    SalesConfirmationTransaction,
 )
 
 # Register your models here.
@@ -18,3 +20,5 @@ admin.site.register(Currency)
 admin.site.register(JournalVoucher)
 admin.site.register(JournalVoucherAccount)
 admin.site.register(JournalVoucherAccountEntity)
+admin.site.register(CompanyAccount)
+admin.site.register(SalesConfirmationTransaction)

@@ -10,6 +10,7 @@ from accounts.models import (
     JournalVoucher,
     JournalVoucherAccount,
     JournalVoucherAccountEntity,
+    SalesConfirmationTransaction,
     SubAccount,
 )
 
@@ -78,6 +79,19 @@ class CreateAccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = "__all__"
 
+    def create(self, validated_data):
+        sub_account = validated_data.get("sub_account")
+        name = validated_data.get("name")
+        payment_type = validated_data.get("payment_type")
+        account, created = Account.objects.get_or_create(
+            payment_type=payment_type,
+            defaults={
+                "sub_account": sub_account,
+                "name": name,
+            },
+        )
+        return account
+
 
 class UpdateAccountSerializer(serializers.ModelSerializer):
     class Meta:
@@ -120,6 +134,18 @@ class CreateJournalVoucherSerializer(serializers.ModelSerializer):
         model = JournalVoucher
         fields = "__all__"
 
+    # def create(self, validated_data):
+    #     # Assuming 'transaction_type' is a unique identifier for your application
+    #     transaction_type = validated_data.get("transaction_type")
+
+    #     # Get or create the journal voucher based on transaction_type
+    #     journal_voucher, created = JournalVoucher.objects.create(
+    #         transaction_type=transaction_type,
+    #         defaults=validated_data,  # Set other fields only if creating a new instance
+    #     )
+
+    #     return journal_voucher
+
 
 class UpdateJournalVoucherSerializer(serializers.ModelSerializer):
     class Meta:
@@ -127,12 +153,42 @@ class UpdateJournalVoucherSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+# ---------- Company Account Serializers ----------
+class GetCompanyAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyAccount
+        fields = "__all__"
+
+
+class CreateCompanyAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyAccount
+        fields = "__all__"
+
+    def create(self, validated_data):
+        account = validated_data.get("account")
+        account_type = validated_data.get("account_type")
+        company_account, created = CompanyAccount.objects.get_or_create(
+            account_type=account_type,
+            defaults={
+                "account": account,
+            },
+        )
+        return company_account
+
+
+class UpdateCompanyAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyAccount
+        fields = "__all__"
+
+
 # ---------------JournalVoucherAccount----------------
 
 
-class GetJournalVoucherAccountSerializer(serializers.Serializer):
+class GetJournalVoucherAccountSerializer(serializers.ModelSerializer):
     journal_voucher = GetJournalVoucherSerializer()
-    account = GetAccountSerializer()
+    account = GetCompanyAccountSerializer()
     entity = serializers.SerializerMethodField()
     currency = GetCurrencySerializer()
 
@@ -179,6 +235,19 @@ class CreateJournalVoucherAccountEntitySerializer(serializers.ModelSerializer):
         model = JournalVoucherAccountEntity
         fields = "__all__"
 
+    def create(self, validated_data):
+        journal_voucher_account = validated_data.get("journal_voucher_account")
+        accountable_id = validated_data.get("accountable_id")
+        accountable_type_id = validated_data.get("accountable_type_id")
+        entity, created = JournalVoucherAccountEntity.objects.get_or_create(
+            accountable_id=accountable_id,
+            journal_voucher_account=journal_voucher_account,
+            defaults={
+                "accountable_type_id": accountable_type_id,
+            },
+        )
+        return entity
+
 
 class UpdateJournalVoucherAccountEntitySerializer(serializers.ModelSerializer):
     class Meta:
@@ -186,20 +255,19 @@ class UpdateJournalVoucherAccountEntitySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-# ---------- Company Account Serializers ----------
-class GetCompanyAccountSerializer(serializers.ModelSerializer):
+class GetSalesConfirmationTransactionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CompanyAccount
+        model = SalesConfirmationTransaction
         fields = "__all__"
 
 
-class CreateCompanyAccountSerializer(serializers.ModelSerializer):
+class CreateSalesConfirmationTransactionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CompanyAccount
         fields = "__all__"
+        model = SalesConfirmationTransaction
 
 
-class UpdateCompanyAccountSerializer(serializers.ModelSerializer):
+class UpdateSalesConfirmationTransactionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CompanyAccount
+        model = SalesConfirmationTransaction
         fields = "__all__"

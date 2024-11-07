@@ -27,7 +27,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -41,12 +41,14 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "corsheaders",
     "accounts",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -203,6 +205,8 @@ SUB_ACCOUNT_NAMES_CHOICES = (
 )
 
 COMPADNY_ACCOUNT_TYPE_CHOICES = (
+    ("CASH_IN_HAND", "CASH IN HAND"),
+    ("BANK", "BANK"),
     ("SALES_ACCOUNT", "Sales Account"),
     ("COST_OF_GOODS_SOLD", "Cost of Goods Sold"),
     ("STORE_ACCOUNT", "Store Account"),
@@ -257,3 +261,6 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True

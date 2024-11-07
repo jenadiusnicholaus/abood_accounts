@@ -61,7 +61,7 @@ class Account(models.Model):
     code = models.CharField(max_length=11, blank=True, null=True)
     is_default = models.BooleanField(default=False)
     payment_type = models.CharField(
-        max_length=20, choices=PAYMENT_TYPE_CHOICES, blank=True, null=True
+        max_length=20, choices=PAYMENT_TYPE_CHOICES, default="ONE_TIME"
     )
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -109,7 +109,7 @@ class CompanyAccount(models.Model):
         db_table = "company_accounts"
 
     def __str__(self):
-        return self.account.name
+        return self.account_type
 
 
 class Currency(models.Model):
@@ -163,7 +163,12 @@ class JournalVoucherAccount(models.Model):
     journal_voucher = models.ForeignKey(
         JournalVoucher, on_delete=models.CASCADE, related_name="accounts_set"
     )
-    account = models.CharField(max_length=100, blank=True, null=True)
+    account = models.ForeignKey(
+        CompanyAccount,
+        on_delete=models.CASCADE,
+        related_name="journal_voucher_accounts_set",
+        null=True,
+    )
     currency = models.ForeignKey(
         Currency, on_delete=models.CASCADE, blank=True, null=True
     )
@@ -193,3 +198,23 @@ class JournalVoucherAccountEntity(models.Model):
     class Meta:
         managed = True
         db_table = "journal_voucher_account_entities"
+        unique_together = (("journal_voucher_account", "accountable_id"),)
+
+
+class SalesConfirmationTransaction(models.Model):
+    journal_voucher = models.ForeignKey(
+        JournalVoucher,
+        on_delete=models.CASCADE,
+        related_name="sales_confirmation_transactions_set",
+    )
+    sales_confirmation_id = models.CharField(max_length=20, blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = "sales_confirmation_transactions"
+        unique_together = (("journal_voucher", "sales_confirmation_id"),)
+
+    def __str__(self):
+        return self.sales_confirmation_id
