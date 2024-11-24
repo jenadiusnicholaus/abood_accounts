@@ -37,6 +37,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "trophyapi.japango.co.tz",
     "accounts.japango.co.tz",
+    "trophyfront.japango.co.tz",
 ]
 
 
@@ -58,12 +59,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "settings.urls"
@@ -278,3 +279,17 @@ SIMPLE_JWT = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://trophyfront.japango.co.tz",
+    "http://localhost:3000",  # or whatever your frontend local URL is
+]
+
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+]
