@@ -281,7 +281,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://trophyfront.japango.co.tz",
+    "https://trophyfront.japango.co.tz",
+    "https://accounts.japango.co.tz",
+    "https://trophyapi.japango.co.tz",
     "http://localhost:3000",  # or whatever your frontend local URL is
 ]
 
