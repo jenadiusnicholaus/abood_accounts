@@ -85,13 +85,6 @@ class Account(models.Model):
         super(Account, self).save(*args, **kwargs)
 
 
-# # CREATE TABLE `company_accounts` (
-#   `id` bigint(20) UNSIGNED NOT NULL,
-#   `account_type` enum('SALES_ACCOUNT','COST_OF_GOODS_SOLD','STORE_ACCOUNT','DISCOUNT_ALLOWED_ACCOUNT','STOCK_ADJUSTMENT_ACCOUNT','ROUND_OFF_ACCOUNT','DISCOUNT_RECEIVED_ACCOUNT','WRITE_OFF_ACCOUNT','EMPLOYEE_ADVANCE_ACCOUNT','DEFERRED_REVEUE_ACCOUNT','DEFERRED_EXPENSE_ACCOUNT','STOCK_RECEIVED_BUT_NOT_BILLED','EXPENSES_INCLUDED_IN_VALUATION','VAT_ACCOUNT') NOT NULL,
-#   `account_id` bigint(20) UNSIGNED NOT NULL
-# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
 class CompanyAccount(models.Model):
     ACCOUNT_TYPE_CHOICES = settings.COMPADNY_ACCOUNT_TYPE_CHOICES
     account_type = models.CharField(
@@ -136,8 +129,10 @@ class JournalVoucher(models.Model):
     currency = models.ForeignKey(
         Currency, on_delete=models.CASCADE, related_name="currency_used_set", null=True
     )
-    date = models.DateTimeField()
-    reference_number = models.CharField(max_length=100, default="NULL", blank=True)
+    date = models.DateTimeField(null=True, blank=True)
+    reference_number = models.CharField(
+        max_length=100, default="NULL", blank=True, null=True
+    )
     exchange_rate = models.FloatField(null=True, blank=True)
     transaction_type = models.CharField(
         max_length=20, choices=TRANSACTION_TYPE_CHOICES, default="SALES_INVOICE"
