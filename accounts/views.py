@@ -1,11 +1,13 @@
 from accounts.models import (
     AccountGroup,
+    CompanyAccount,
     JournalVoucherAccount,
     SubAccount,
 )
 from accounts.serializers import (
     CreateJournalVoucherSerializer,
     CreateSalesConfirmationTransactionSerializer,
+    GetCompanyAccountSerializer,
     GetJournalVoucherAccountSerializer,
     UserSerializer,
 )
@@ -257,7 +259,6 @@ class AccountDRCRViewSet(viewsets.ModelViewSet):
             # You may need to handle deletions of DR-related objects depending on their state
             return cr_response  # Return the error response from create_CR
 
-        # Save sales confirmation transaction
         sales_transaction_data = {
             "journal_voucher": jour_voucher.id,
             "sales_confirmation_id": request.data.get("sales_confirmation_id"),
@@ -289,3 +290,9 @@ class AccountDRCRViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class CompanyAccountViewSet(viewsets.ModelViewSet):
+    queryset = CompanyAccount.objects.all()
+    serializer_class = GetCompanyAccountSerializer
+    permission_classes = [IsAuthenticated]
