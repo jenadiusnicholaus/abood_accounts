@@ -38,6 +38,7 @@ ALLOWED_HOSTS = [
     "trophyapi.japango.co.tz",
     "accounts.japango.co.tz",
     "trophyfront.japango.co.tz",
+    "66.29.152.197",
 ]
 
 
